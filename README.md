@@ -72,7 +72,7 @@ docker run -p 7860:7860 sentiment-api
 pip install -r requirements.txt
 
 # Lancer l'API
-cd app
+cd sentiments_analysis
 uvicorn main:app --host 0.0.0.0 --port 7860 --reload
 ```
 
@@ -83,7 +83,7 @@ uvicorn main:app --host 0.0.0.0 --port 7860 --reload
 pip install -r requirements.txt
 
 # Lancer l'interface Gradio
-cd gradio
+cd sentiment_analysis/sentiment_analysis/
 python app.py
 ```
 
