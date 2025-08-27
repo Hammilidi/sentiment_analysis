@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis API - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e1e1;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn-docs {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-docs:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 5px solid #28a745;
+        }
+
+        .result.error {
+            background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+            border-left: 5px solid #dc3545;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .sentiment-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .sentiment-badge {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .sentiment-positive {
+            background: #28a745;
+            color: white;
+        }
+
+        .sentiment-negative {
+            background: #dc3545;
+            color: white;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .confidence-positive {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .confidence-negative {
+            background: linear-gradient(90deg, #dc3545, #e74c3c);
+        }
+
+        .json-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .example-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Sentiment Analysis API</h1>
+            <p>Analysez le sentiment de vos textes avec DistilBERT</p>
+        </div>
+
+        <div class="content">
+            <form id="sentimentForm">
+                <div class="form-group">
+                    <label for="textInput">Texte à analyser :</label>
+                    <textarea 
+                        id="textInput" 
+                        placeholder="Entrez votre texte ici... (ex: 'This product is amazing!')"
+                        maxlength="1000"
+                    ></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        🔍 Analyser le sentiment
+                    </button>
+                    <button type="button" onclick="clearResults()" class="btn-secondary">
+                        🗑️ Effacer
+                    </button>
+                    <button type="button" onclick="window.open('/docs', '_blank')" class="btn-docs">
+                        📚 Documentation API
+                    </button>
+                </div>
+            </form>
+
+            <div class="examples">
+                <h3>💡 Exemples rapides :</h3>
+                <div class="example-buttons">
+                    <button class="example-btn" onclick="setExample('This product is absolutely amazing! I love it!')">Très positif</button>
+                    <button class="example-btn" onclick="setExample('Good quality, satisfied with my purchase')">Positif</button>
+                    <button class="example-btn" onclick="setExample('It works fine, nothing special')">Neutre</button>
+                    <button class="example-btn" onclick="setExample('Not what I expected, quite disappointed')">Négatif</button>
+                    <button class="example-btn" onclick="setExample('Terrible quality! Complete waste of money!')">Très négatif</button>
+                </div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyse en cours...</p>
+            </div>
+
+            <div id="result" class="result">
+                <h3 id="resultTitle">Résultat de l'analyse</h3>
+                <div id="resultContent"></div>
+                <div class="json-display">
+                    <strong>Réponse JSON complète :</strong>
+                    <pre id="jsonOutput"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('sentimentForm');
+        const textInput = document.getElementById('textInput');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const jsonOutput = document.getElementById('jsonOutput');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('Veuillez entrer un texte à analyser');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(data, 'success');
+                } else {
+                    showError(data.detail || 'Erreur lors de l\'analyse');
+                }
+            } catch (error) {
+                showError('Erreur de connexion à l\'API');
+            }
+        });
+
+        function showLoading() {
+            loading.style.display = 'block';
+            result.style.display = 'none';
+        }
+
+        function showResult(data, type) {
+            loading.style.display = 'none';
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+
+            const sentiment = data.sentiment;
+            const confidence = data.confidence;
+            const processingTime = data.processing_time_ms;
+
+            const sentimentClass = sentiment === 'POSITIVE' ? 'positive' : 'negative';
+            const confidencePercent = Math.round(confidence * 100);
+
+            resultContent.innerHTML = `
+                <div class="sentiment-display">
+                    <span class="sentiment-badge sentiment-${sentimentClass}">
+                        ${sentiment === 'POSITIVE' ? '😊 POSITIF' : '😞 NÉGATIF'}
+                    </span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill confidence-${sentimentClass}" 
+                             style="width: ${confidencePercent}%">
+                            ${confidencePercent}%
+                        </div>
+                    </div>
+                </div>
+                <p><strong>Confiance :</strong> ${confidence}</p>
+                <p><strong>Temps de traitement :</strong> ${processingTime} ms</p>
+                <p><strong>Texte analysé :</strong> "${data.text}"</p>
+            `;
+
+            jsonOutput.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showError(message) {
+            loading.style.display = 'none';
+            result.className = 'result error';
+            result.style.display = 'block';
+            
+            resultContent.innerHTML = `
+                <p><strong>❌ Erreur :</strong> ${message}</p>
+            `;
+            
+            jsonOutput.textContent = JSON.stringify({ error: message }, null, 2);
+        }
+
+        function clearResults() {
+            textInput.value = '';
+            result.style.display = 'none';
+            textInput.focus();
+        }
+
+        function setExample(text) {
+            textInput.value = text;
+            textInput.focus();
+        }
+
+        // Focus automatique sur le champ de texte
+        textInput.focus();
+    </script>
+</body>
+</html>
